@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import GuestList from './GuestList';
-
-// import './App.css';
+import Counter from './Counter';
 
 class App extends Component {
 
@@ -16,12 +15,12 @@ class App extends Component {
       },
       {
         name: 'Nick',
-        isConfirmed: true,
+        isConfirmed: false,
         isEditing: false
       },
       {
         name: 'Boo',
-        isConfirmed: true,
+        isConfirmed: false,
         isEditing: false
       }
     ]
@@ -88,8 +87,13 @@ class App extends Component {
   //     })
   //   });
 
-  // computed from state (don't include in state)
   getTotalInvited = () => this.state.guests.length;
+
+  getTotalAttending = () =>
+    this.state.guests.reduce(
+      (total, guest) => guest.isConfirmed ? total + 1 : total,
+      0
+    );
 
   // getTotalConfirmed = () => {
   //   const confirmed = 0;
@@ -101,38 +105,48 @@ class App extends Component {
 
   // getUncomfirmedGuests = () => ...
 
-  // receive event and get value of guestName field and setState of guests
   handleNameInput = event =>
     this.setState({ pendingGuest: event.target.value })
 
-  // add pendingGuest to guests. set name. set defaults for other props
-  addGuest = (event) => {
+  newGuestSubmitHandler = (event) => {
     event.preventDefault();
-    const newGuest = {
-      name: this.state.pendingGuest,
-      isConfirmed: false,
-      isEditing: false
-    };
-    const currentGuests = this.state.guests
-    console.log(currentGuests)
-    currentGuests.push(newGuest);
-    console.log(currentGuests)
     this.setState({
-      guests: currentGuests,
+      guests: [
+        {
+          name: this.state.pendingGuest,
+          isConfirmed: false,
+          isEditing: false
+        },
+        ...this.state.guests
+      ],
       pendingGuest: ""
     });
     document.getElementById('invite-guest-input').focus();
+  }
 
+  removeGuestAt = indexToRemove => {
+    this.setState({
+      guests: this.state.guests.filter( (guest, index) => {
+        if(index !== indexToRemove){
+          return guest;
+        } else {
+          return;
+        }
+      })
+    });
   }
 
   render() {
+
+    const totalInvited = this.getTotalInvited();
+    const totalAttending = this.getTotalAttending();
+    const numberUnconfirmed = totalInvited - totalAttending;
+
     return (
       <div className="App">
         <header>
           <h1>RSVP</h1>
           <p>A Treehouse App</p>
-
-
           <form>
               <input
                 type="text"
@@ -145,23 +159,10 @@ class App extends Component {
                 type="submit"
                 name="submit"
                 value="submit"
-                onClick={this.addGuest}
+                onClick={this.newGuestSubmitHandler}
                 >Submit
               </button>
           </form>
-
-
-
-
-
-
-
-
-
-
-
-
-
         </header>
         <div className="main">
           <div>
@@ -174,22 +175,13 @@ class App extends Component {
               /> Hide those who haven't responded
             </label>
           </div>
-          <table className="counter">
-            <tbody>
-              <tr>
-                <td>Attending:</td>
-                <td>2</td>
-              </tr>
-              <tr>
-                <td>Unconfirmed:</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>Total:</td>
-                <td>3</td>
-              </tr>
-            </tbody>
-          </table>
+
+          <Counter
+            totalInvited={totalInvited}
+            totalAttending={totalAttending}
+            numberUnconfirmed={numberUnconfirmed}
+            guests={this.state.guests}
+          />
 
           <GuestList
             guests={this.state.guests}
@@ -197,6 +189,8 @@ class App extends Component {
             toggleConfirmationAt={this.toggleConfirmationAt}
             setName={this.setNameAt}
             isFiltered={this.state.isFiltered}
+            removeGuestAt={this.removeGuestAt}
+            pendingGuest={this.state.pendingGuest}
           />
 
         </div>
