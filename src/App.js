@@ -47,12 +47,10 @@ class App extends Component {
   toggleEditingAt = uid =>
       this.toggleGuestPropertyAt('isEditing', uid);
 
-  setNameAt = (text, indexToChange) =>
+  setNameAt = (text, uid) =>
     this.setState({
-      // replace whole guest array vs just find the right
-      // guest and edit????
-      guests: this.state.guests.map( (guest, index) => {
-        if(index === indexToChange){
+      guests: this.state.guests.map( (guest) => {
+        if(guest.uid === uid){
           return {
             ...guest,
             name: text
@@ -82,10 +80,10 @@ class App extends Component {
     document.getElementById('invite-guest-input').focus();
   }
 
-  removeGuestAt = indexToRemove => {
+  removeGuestAt = uid => {
     this.setState({
-      guests: this.state.guests.filter( (guest, index) => {
-        if(index !== indexToRemove){
+      guests: this.state.guests.filter( (guest) => {
+        if(guest.uid !== uid){
           return guest;
         } else {
           return null;
