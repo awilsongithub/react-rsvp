@@ -1,30 +1,22 @@
 import React, { Component } from 'react';
-import GuestList from './GuestList';
-import Counter from './Counter';
+import Header from './Header';
+import MainContent from './MainContent';
 
 class App extends Component {
+
+  /**===============================================
+                      STATE
+  ================================================== */
 
   state = {
     isFiltered: false,
     pendingGuest: "",
-    guests: [
-      {
-        name: 'Treasure',
-        isConfirmed: false,
-        isEditing: false
-      },
-      {
-        name: 'Nick',
-        isConfirmed: false,
-        isEditing: false
-      },
-      {
-        name: 'Boo',
-        isConfirmed: false,
-        isEditing: false
-      }
-    ]
+    guests: []
   }
+
+  /**===============================================
+                       METHODS
+  ================================================== */
 
   // hide/show guests who haven't responded
   toggleFiltered = () => {
@@ -36,10 +28,10 @@ class App extends Component {
   // general purpose propertyToggle method
   // note we don't modify guests array, we create a new array
   // and return it as the new value of guests
-  toggleGuestPropertyAt = (property, indexToChange) =>
+  toggleGuestPropertyAt = (property, uid) =>
     this.setState({
-      guests: this.state.guests.map( (guest, index) => {
-        if(index === indexToChange){
+      guests: this.state.guests.map( (guest) => {
+        if(guest.uid === uid){
           return {
             ...guest,
             [property]: !guest[property]
@@ -49,11 +41,11 @@ class App extends Component {
       })
     });
 
-  toggleConfirmationAt = index =>
-    this.toggleGuestPropertyAt('isConfirmed', index);
+  toggleConfirmationAt = uid =>
+    this.toggleGuestPropertyAt('isConfirmed', uid);
 
-  toggleEditingAt = index =>
-      this.toggleGuestPropertyAt('isEditing', index);
+  toggleEditingAt = uid =>
+      this.toggleGuestPropertyAt('isEditing', uid);
 
   setNameAt = (text, indexToChange) =>
     this.setState({
@@ -70,7 +62,78 @@ class App extends Component {
       })
     })
 
+  handleNameInput = event =>
+    this.setState({ pendingGuest: event.target.value })
 
+  newGuestSubmitHandler = (event) => {
+    event.preventDefault();
+    this.setState({
+      guests: [
+        {
+          name: this.state.pendingGuest,
+          isConfirmed: false,
+          isEditing: false,
+          uid: Math.random().toString().slice(2,10) // 8 digit unique string
+        },
+        ...this.state.guests
+      ],
+      pendingGuest: ""
+    });
+    document.getElementById('invite-guest-input').focus();
+  }
+
+  removeGuestAt = indexToRemove => {
+    this.setState({
+      guests: this.state.guests.filter( (guest, index) => {
+        if(index !== indexToRemove){
+          return guest;
+        } else {
+          return null;
+        }
+      })
+    });
+  }
+
+  /**===============================================
+                      RENDER
+  ================================================== */
+  render() {
+    return (
+      <div className="App">
+
+        <Header
+          pendingGuest={this.state.pendingGuest}
+          handleNameInput={this.handleNameInput}
+          newGuestSubmitHandler={this.newGuestSubmitHandler}
+        />
+
+        <MainContent
+          checked={this.state.isFiltered}
+          onChange={this.toggleFiltered}
+          guests={this.state.guests}
+          toggleEditingAt={this.toggleEditingAt}
+          toggleConfirmationAt={this.toggleConfirmationAt}
+          setName={this.setNameAt}
+          isFiltered={this.state.isFiltered}
+          removeGuestAt={this.removeGuestAt}
+          pendingGuest={this.state.pendingGuest}
+          toggleFiltered={this.toggleFiltered}
+        />
+
+      </div>
+    );
+  }
+}
+
+export default App;
+
+
+
+
+
+/**===============================================
+ * THIS IS ALL UNUSED
+================================================== */
   // About use of spread operator:
   // this method uses spread operator to spread guest in returned object
   // which basically clones it, but then we override one prop (isConfirmed)
@@ -86,14 +149,21 @@ class App extends Component {
   //       return guest;
   //     })
   //   });
+  //
+  //
+  //
+  // const totalInvited = this.getTotalInvited();
+  // const totalAttending = this.getTotalAttending();
+  // const numberUnconfirmed = totalInvited - totalAttending;
 
-  getTotalInvited = () => this.state.guests.length;
 
-  getTotalAttending = () =>
-    this.state.guests.reduce(
-      (total, guest) => guest.isConfirmed ? total + 1 : total,
-      0
-    );
+  // getTotalInvited = () => this.state.guests.length;
+  //
+  // getTotalAttending = () =>
+  //   this.state.guests.reduce(
+  //     (total, guest) => guest.isConfirmed ? total + 1 : total,
+  //     0
+  //   );
 
   // getTotalConfirmed = () => {
   //   const confirmed = 0;
@@ -104,99 +174,21 @@ class App extends Component {
   // }
 
   // getUncomfirmedGuests = () => ...
-
-  handleNameInput = event =>
-    this.setState({ pendingGuest: event.target.value })
-
-  newGuestSubmitHandler = (event) => {
-    event.preventDefault();
-    this.setState({
-      guests: [
-        {
-          name: this.state.pendingGuest,
-          isConfirmed: false,
-          isEditing: false
-        },
-        ...this.state.guests
-      ],
-      pendingGuest: ""
-    });
-    document.getElementById('invite-guest-input').focus();
-  }
-
-  removeGuestAt = indexToRemove => {
-    this.setState({
-      guests: this.state.guests.filter( (guest, index) => {
-        if(index !== indexToRemove){
-          return guest;
-        } else {
-          return;
-        }
-      })
-    });
-  }
-
-  render() {
-
-    const totalInvited = this.getTotalInvited();
-    const totalAttending = this.getTotalAttending();
-    const numberUnconfirmed = totalInvited - totalAttending;
-
-    return (
-      <div className="App">
-        <header>
-          <h1>RSVP</h1>
-          <p>A Treehouse App</p>
-          <form>
-              <input
-                type="text"
-                value={this.state.pendingGuest}
-                placeholder="Invite Someone"
-                onChange={this.handleNameInput}
-                id='invite-guest-input'
-              />
-              <button
-                type="submit"
-                name="submit"
-                value="submit"
-                onClick={this.newGuestSubmitHandler}
-                >Submit
-              </button>
-          </form>
-        </header>
-        <div className="main">
-          <div>
-            <h2>Invitees</h2>
-            <label>
-              <input
-                type="checkbox"
-                checked={this.state.isFiltered}
-                onChange={this.toggleFiltered}
-              /> Hide those who haven't responded
-            </label>
-          </div>
-
-          <Counter
-            totalInvited={totalInvited}
-            totalAttending={totalAttending}
-            numberUnconfirmed={numberUnconfirmed}
-            guests={this.state.guests}
-          />
-
-          <GuestList
-            guests={this.state.guests}
-            toggleEditingAt={this.toggleEditingAt}
-            toggleConfirmationAt={this.toggleConfirmationAt}
-            setName={this.setNameAt}
-            isFiltered={this.state.isFiltered}
-            removeGuestAt={this.removeGuestAt}
-            pendingGuest={this.state.pendingGuest}
-          />
-
-        </div>
-      </div>
-    );
-  }
-}
-
-export default App;
+  //
+  //
+  //
+  //   // {
+    //   name: 'Treasure',
+    //   isConfirmed: false,
+    //   isEditing: false
+    // },
+    // {
+    //   name: 'Nick',
+    //   isConfirmed: false,
+    //   isEditing: false
+    // },
+    // {
+    //   name: 'Boo',
+    //   isConfirmed: false,
+    //   isEditing: false
+    // }

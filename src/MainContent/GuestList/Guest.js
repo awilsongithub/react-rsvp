@@ -15,12 +15,6 @@ const Guest = props =>
         checked={props.isConfirmed}
         onChange={props.handleConfirmation} /> Confirmed
     </label>
-    {/* buttn needs to say save when isEditing, else say edit.
-      we could create a component and pass isEditing
-      and have it return button that says right word depending
-      on value of isEditing. OR
-      could we just ..... TODO....
-      */}
     <button onClick={props.handleToggleEditing}>edit</button>
     <button onClick={props.removeGuestAt}>remove</button>
   </li>

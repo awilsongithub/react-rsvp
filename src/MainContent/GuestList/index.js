@@ -1,18 +1,9 @@
 import React from 'react';
-import Guest from './Guest';
 import PropTypes from 'prop-types';
+import Guest from './Guest';
 import PendingGuest from './PendingGuest';
 
-// NOTE: this component keeps track of index of Guests
-// individual guests have no idea that there even ARE other guests
-// toggleConfirmation handler is defined here and thus will remember
-// the value of index here
-// so we create each Guest and give it a method that will pass the
-// "id" of itself up. Its like a dogtag or a chip embedded in the handler method
-// Guestlist is keeping track of the Guests so it is responsible for
-// handling this
-
-const GuestList = props =>
+const GuestList = props => (
   <ul>
 
     <PendingGuest
@@ -23,17 +14,19 @@ const GuestList = props =>
       .filter(guest => !props.isFiltered || guest.isConfirmed)
       .map( (guest, index) =>
         <Guest
-          key={index}
+          key={guest.uid}
           name={guest.name}
           isConfirmed={guest.isConfirmed}
           isEditing={guest.isEditing}
-          handleConfirmation={() => props.toggleConfirmationAt(index)}
-          handleToggleEditing={() => props.toggleEditingAt(index)}
+          handleConfirmation={() => props.toggleConfirmationAt(guest.uid)}
+          handleToggleEditing={() => props.toggleEditingAt(guest.uid)}
           removeGuestAt={() => props.removeGuestAt(index)}
           setName={text => props.setName(text, index)}
         />
     )}
   </ul>
+)
+
 
 GuestList.propTypes = {
   guests: PropTypes.array.isRequired,

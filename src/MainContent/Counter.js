@@ -9,19 +9,19 @@ const Counter = props => {
   // maybe we want counter to be dumb and do as its told
   // because we want to retain at higher level, ability
   // to add logic like require confirmation AND payment
-  // before saying they are attending...
+  // before saying they are totalAttending...
 
-  let attending = 0;
-  let uncomfirmed = 0;
-  let totalGs = 0;
+  let totalAttending = 0;
+  let totalUnconfirmed = 0;
+  let totalGuests = 0;
 
   const calculateCounterData = () => {
-    totalGs = props.guests.length;
-    attending = props.guests.reduce(
+    totalGuests = props.guests.length;
+    totalAttending = props.guests.reduce(
       (total, guest) => guest.isConfirmed ? total + 1 : total,
       0
     );
-    uncomfirmed = totalGs - attending;
+    totalUnconfirmed = totalGuests - totalAttending;
   }
   calculateCounterData();
 
@@ -30,15 +30,15 @@ const Counter = props => {
       <tbody>
         <tr>
           <td>Attending:</td>
-          <td>{attending}</td>
+          <td>{totalAttending}</td>
         </tr>
         <tr>
           <td>Unconfirmed:</td>
-          <td>{uncomfirmed}</td>
+          <td>{totalUnconfirmed}</td>
         </tr>
         <tr>
           <td>Total:</td>
-          <td>{totalGs}</td>
+          <td>{totalGuests}</td>
         </tr>
       </tbody>
     </table>
