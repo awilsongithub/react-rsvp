@@ -1,22 +1,69 @@
 import React, { Component } from 'react';
 import Header from './Header';
 import MainContent from './MainContent';
+import SimpleStorage from 'react-simple-storage';
+import ApiData from './ApiData';
 
 class App extends Component {
 
   /**===============================================
                       STATE
   ================================================== */
-
+  /**
+   * TODO: while watching fetching data in react
+   * constructor with super()?
+   * componentDidMount? (put fetch there)
+   * install fetch polyfill: https://github.com/github/fetch
+   * axios: stronger browser support https://github.com/axios/axios
+   *
+   */
   state = {
     isFiltered: false,
     pendingGuest: "",
-    guests: []
+    guests: [],
+    apiData: []
   }
 
   /**===============================================
-                       METHODS
+                  LIFECYCLE METHODS
   ================================================== */
+
+  componentDidMount() {
+    fetch('https://jsonplaceholder.typicode.com/todos')
+      .then(response => response.json())
+      .then(json => {
+        this.setState({
+          apiData: json
+        })
+        console.log('json[0]:', json);
+        console.log('apiData:', this.state.apiData)
+      })
+      // .then(json => console.log(json[0]))
+  }
+
+  /**===============================================
+                  OTHER METHODS
+  ================================================== */
+
+  toggleCompleted = (item, event) => {
+    this.setState({
+      apiData: this.state.apiData.map( toDo => {
+        if(toDo.id === item.id){
+          toDo.completed = !toDo.completed;
+        }
+        return toDo;
+      })
+    })
+  }
+
+  deleteToDo = (item, event) => {
+    console.log('called delete')
+    this.setState({
+      apiData: this.state.apiData.filter( toDo => {
+        return (toDo.id !== item.id);
+      })
+    })
+  }
 
   // hide/show guests who haven't responded
   toggleFiltered = () => {
@@ -65,6 +112,12 @@ class App extends Component {
 
   newGuestSubmitHandler = (event) => {
     event.preventDefault();
+    const input = document.getElementById('invite-guest-input');
+    // prevent empty string submission
+    if(!this.state.pendingGuest.length){
+      input.focus();
+      return null;
+    }
     this.setState({
       guests: [
         {
@@ -77,7 +130,7 @@ class App extends Component {
       ],
       pendingGuest: ""
     });
-    document.getElementById('invite-guest-input').focus();
+    input.focus();
   }
 
   removeGuestAt = uid => {
@@ -99,6 +152,10 @@ class App extends Component {
     return (
       <div className="App">
 
+        {/* adds local storage via plugin. See:
+        https://hackernoon.com/how-to-take-advantage-of-local-storage-in-your-react-projects-a895f2b2d3f2 */}
+        <SimpleStorage parent={this} />
+
         <Header
           pendingGuest={this.state.pendingGuest}
           handleNameInput={this.handleNameInput}
@@ -116,6 +173,13 @@ class App extends Component {
           removeGuestAt={this.removeGuestAt}
           pendingGuest={this.state.pendingGuest}
           toggleFiltered={this.toggleFiltered}
+        />
+
+        {/* create component, import it, pass it apiData, it will update when apiData changes in state  */}
+        <ApiData
+          data={this.state.apiData}
+          toggleCompleted={this.toggleCompleted}
+          deleteToDo={this.deleteToDo}
         />
 
       </div>

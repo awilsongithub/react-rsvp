@@ -9,7 +9,7 @@ const GuestInputForm = props =>
       placeholder="Invite Someone"
       onChange={props.handleNameInput}
       id='invite-guest-input'
-      autoFocusd
+      autoFocus
     />
     <button
       type="submit"
